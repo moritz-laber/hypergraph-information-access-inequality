@@ -24,19 +24,19 @@ import pickle
 ### PARAMETERS ###
 
 # hypergraph parameters
-n_hg = 1000                                # number of hypergraphs to average over
-n = 10_000                                 # number of nodes
-gamma = 2.9                                # exponent of the expected degree distribution
-pms = [0.5, 0.25]                          # fractions of group 1 nodes
-group_labels = [0, 1]                      # groups
+n_hg = 1000                                 # number of hypergraphs to average over
+n = 10_000                                  # number of nodes
+gamma = 2.9                                 # exponent of the expected degree distribution
+pms = [0.5, 0.25]                           # fractions of group 1 nodes
+group_labels = [0, 1]                       # groups
 
-degree_seed = 1245                         # seed for sampling expected degrees
-hypergraph_seed = 1235                     # seed for hypergraph generator
+degree_seed = 1245                          # seed for sampling expected degrees
+hypergraph_seed = 1235                      # seed for hypergraph generator
 
-new_hypergraphs = True                     # whether to generate new hypergraphs or read results from file
-output_file = './degree_distribution.pkl'  # where to store new hypergraphs
+new_hypergraphs = False                     # whether to generate new hypergraphs or read results from file
+output_file = './degree_distribution.pkl'   # where to store new hypergraphs
 
-verbose = True                             # whether to print progress
+verbose = True                              # whether to print progress
 
 # plot parameters
 input_file = output_file                    # from where to read results if new_hypergraphs is false
@@ -56,7 +56,7 @@ marker_kappa = {0:'s', 1 : 'o'}             # markers for groups (0,1) for expec
 marker_degree = {0:'x', 1: '+'}             # markers for groups (0,1) for realized degree
 markersize_kappa = {0:7, 1:6}               # marker sizes for groups (0,1) for expected degree
 markersize_degree = {0:6, 1:7}              # marker sizes for groups (0,1) for realized degree
-alpha = 0.65                                # transparency for expected degree
+alpha = 0.75                                # transparency for expected degree
 
 xmin = 1.0                                  # minimum value for binning
 xmax = None                                 # maximum value. If None then set data dependent
@@ -89,7 +89,7 @@ to_header = {('weak', 0.5)    : 'hom. bal.',  # subplotheaders
              ('neutral', 0.25): 'neu. imb.'}
 ncol_legend = 4                              # number of legend columsn
 pos_legend = (0.5, -5)                       # legend position
-fontsize_legend = 10                         # legend fontsize
+fontsize_legend = 9                          # legend fontsize
 
 ### MAIN ###
 
@@ -199,10 +199,10 @@ for i, pm in enumerate(pms):
 
 # add legend
 handles = [
-    Line2D([0], [0], marker=marker_kappa[0], color=color_kappa[0], linestyle='', markersize=markersize_kappa[0], label=r'$\rho_0(\kappa)$'),
-    Line2D([0], [0], marker=marker_kappa[1], color=color_kappa[1], linestyle='', markersize=markersize_kappa[1], label=r'$\rho_1(\kappa)$'),
-    Line2D([0], [0], marker=marker_degree[0], color=color_degree[0], linestyle='', markersize=markersize_degree[0], label=r'$p_0(k)$'),
-    Line2D([0], [0], marker=marker_degree[1], color=color_degree[1], linestyle='', markersize=markersize_degree[1], label=r'$p_1(k)$'),
+    Line2D([0], [0], marker=marker_kappa[0], color=color_kappa[0], linestyle='', markersize=markersize_kappa[0], label=r'$\rho_0(\kappa)$ (expected)'),
+    Line2D([0], [0], marker=marker_kappa[1], color=color_kappa[1], linestyle='', markersize=markersize_kappa[1], label=r'$\rho_1(\kappa)$ (expected)'),
+    Line2D([0], [0], marker=marker_degree[0], color=color_degree[0], linestyle='', markersize=markersize_degree[0], label=r'$p_0(k)$ (realized)'),
+    Line2D([0], [0], marker=marker_degree[1], color=color_degree[1], linestyle='', markersize=markersize_degree[1], label=r'$p_1(k)$ (realized)')
 ]
 
 ax = fig.add_subplot(gs[-1, :])
@@ -212,3 +212,4 @@ ax.legend(handles=handles, ncol=ncol_legend, loc='lower center', bbox_to_anchor=
 fig.savefig(f'{figure_name}.pdf')
 fig.savefig(f'{figure_name}.svg')
 fig.savefig(f'{figure_name}.png', dpi=dpi)
+
