@@ -168,7 +168,7 @@ acquisition_annotations = [
 # Diffusion Fairness Parameters
 
 diffusion_xlabel = r'$f$'
-diffusion_ylabel = r'$\alpha(f)$'
+diffusion_ylabel = r'$\delta(f)$'
 diffusion_ylim = (0., 1.6)
 diffusion_yticks = [0.0, 0.5, 1.0, 1.5]
 diffusion_yticklabels = ['0.0', '0.5', '1.0', '1.5']
