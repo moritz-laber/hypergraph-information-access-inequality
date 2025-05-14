@@ -130,7 +130,8 @@ bar_style = {
     'bar_linewidth' : 0.75,
     'bar_width' : 0.25,
     'label_rotation' : 0,
-    'ylabel_coords' : (-0.05, 0.10)
+    'ylabel_coords' : (-0.05, 0.15),
+    'yticks_if_label' : [0.0, 1.0]
 }
 
 bar_xlabel = r'$r$'

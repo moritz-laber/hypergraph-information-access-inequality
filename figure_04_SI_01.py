@@ -127,9 +127,9 @@ bar_style = {
     'bar_linewidth' : 0.75,
     'bar_width' : 0.25,
     'label_rotation' : 0,
-    'ylabel_coords' : (-0.35, 1.05)
+    'ylabel_coords' : (-0.35, 0.25),
+    'yticks_if_label' : [0.0, 1.0]
 }
-
 bar_xlabel = r'$r$'
 bar_ylabel = r'$h^{(g)}_{s,r}$'
 

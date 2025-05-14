@@ -1019,6 +1019,7 @@ def create_homophily_barplot(
     if yaxis_visible:
         ax.set_ylabel(ylabel, rotation=style['label_rotation'])
         ax.yaxis.label.set_position(style['ylabel_coords'])
+        ax.set_yticks(style['yticks_if_label'])
         
     for text, coords, fs, fw, c in zip(texts, text_coords, text_fontsizes, text_fontweights, text_colors):
         x,y = coords
