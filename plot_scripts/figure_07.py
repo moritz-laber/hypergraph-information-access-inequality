@@ -1,8 +1,8 @@
 """
-Figure 9
+Figure 7
 
-This script generates diffusion fairness plots
-for real-world hypergraphs.
+This script generates the figure on informing
+90% of the nodes in real-world hypergraphs.
 
 ML - 2025/05/12
 """
@@ -20,18 +20,18 @@ from plot_functions import *
 # I/O Parameters
 results_dir = './results'
 stats_dir = './stats'
-output_path = './'
-figname = 'fig09'
+output_path = '../'
+figname = 'fig07'
 
 hypergraphs = [
     'primaryschool',
     'highschool',
     'hospital',
     'housebills',
-    'housebillsgender_genderizerio',
+    'housebillsgender_genderapi',
     'aps_genderapi',
     'senatebills',
-    'senatebillsgender_genderizerio', 
+    'senatebillsgender_genderapi', 
     'dblp_genderapi'
 ]
 
@@ -46,6 +46,18 @@ hypergraph_names = [
     'Senate (Party)',
     'Senate (Gender)',
     'DBLP'
+]
+
+percentile = [
+    99,
+    99,
+    99,
+    99,
+    85,
+    99,
+    99,
+    85,
+    99
 ]
 
 order = [
@@ -86,26 +98,14 @@ abc = {
     (5,2) : "i"
 }
 
-diffusion_ylim = {
-    (1,0) : (0,1.5),
-    (1,1) : (0,1.5),
-    (1,2) : (0,1.5),
-    (3,0) : (0,5),
-    (3,1) : (0,35),
-    (3,2) : (0,1.5),
-    (5,0) : (0,5),
-    (5,1) : (0,1.5),
-    (5,2) : (0,1.5)
-}
-
 annotation_fontsizes = [12, 10]
 annotation_fontweights = ['bold', 'normal']
-annotation_coords = [(-0.1, 1.15), (0.45, 1.15)]
+annotation_coords = [(-2.5, 1.15), (0., 1.15)]
 
 annotation_colors = ['k', '#272c2d']
 small_annotation_color = '#525758'
 
-spm  = 1.
+spm = 0.
 
 text_style = {
     'fontsize' : 10,
@@ -113,8 +113,8 @@ text_style = {
     'fontweight' : 'bold'
 }
 
-text_coords = (-0.04, 0.4)
-text_line = "Diffusion fairness: Ability to disseminate information"
+text_coords = (-0.04, 0.10)
+text_line = "Information access inequality in real-world hypergraphs"
 
 # Figure Parameters
 figsize = (7.2, 7.2)   # inches
@@ -122,45 +122,44 @@ figure_hspace = 0.75
 figure_wspace = 0.45
 figure_ncols = 3
 figure_nrows = 8
-figure_height_ratios = [0.2, 1.0, 0.15, 1.0, 0.15, 1.0, 0.01, 0.01]
+figure_height_ratios = [0.2, 1.0, 0.15, 1.0, 0.15, 1.0, 0.05, 0.05]
 figure_width_ratios = [1., 1., 1.]
 dpi = 500
 
-# Bootstrap Parameters
-bootstrap_seed = 213
-bootstrap_num = 100
-bootstrap_p = 0.90
+# Violin Plot Parameters
+violin_hspace = 0.
+violin_wspace = 0.
+violin_order = order
+violin_labels = labels
+violin_ylabel = r'$t^{(g)}_{90}$'
 
-# Diffusion Fairness Parameters
+violin_xmin = 0.
+violin_xmax = None
+violin_ymin = 0.
+violin_ymax = None
+violin_npoints = 400
 
-diffusion_xlabel = r'$f$'
-diffusion_ylabel = r'$\delta(f)$'
-diffusion_yticks = None
-diffusion_yticklabels = None
-diffusion_xlim = (0., 0.9)
-diffusion_xticks = [0.0, 0.3, 0.6, 0.9]
-diffusion_xticklabels = ['0.0', '0.3', '0.6', '0.9']
+violin_threshold = 0
 yaxis_visible = True
 
-diffusion_style = {
+violin_style = {
     'colors_line' : {
-        'linear' : '#004563',
-        'sublinear' : '#b679ae',
-        'superlinear'  : '#8c2b2c',
-        'asymmetric' : '#647f1a',
+        'linear' : ('#004563', '#004563'),
+        'sublinear' : ('#b679ae', '#b679ae'),
+        'superlinear'  : ('#8c2b2c', '#8c2b2c'),
+        'asymmetric' : ('#647f1a', '#647f1a'),
+        'axis' : 'k'
     },
-    'colors_fill' : {
-        'linear' : '#015e7e',
-        'sublinear' : '#d294ca',
-        'superlinear'  : '#a74341',
-        'asymmetric' : '#7f9a36',
+    'colors_face' : {
+        'linear' : ('#015e7e', '#015e7e'),
+        'sublinear' : ('#d294ca', '#d294ca'),
+        'superlinear'  : ('#a74341', '#a74341'),
+        'asymmetric' : ('#7f9a36', '#7f9a36'),
+        'axis' : 'k'
     },
-    'colors_axis' : 'k',
     'alpha_line' : 0.95,
-    'alpha_fill' : 0.5,
-    'linewidth' : 1,
+    'alpha_face' : 0.95,
     'linewidth_axis' : 1,
-    'linestyle_axis' : '--',
     'fontsize_xlabels' : 10,
     'fontsize_ylabels' : 10,
     'fontsize_xticks'  : 9,
@@ -168,57 +167,32 @@ diffusion_style = {
     'label_rotation' : 40 
 }
 
-diffusion_annotations = [
+violin_annotations = [
     {
-    'text' : '',
-    'text_fontsize': 6,
-    'text_color' : small_annotation_color,
-    'text_fontstyle': 'italic',
-    'arrow_tip' :  (0.9, 1.05),
-    'arrow_tail' : (0.9, 0.75),
-    'arrow_props' :{
-        'arrowstyle':'->',
-        'color':'#586170',
-        'lw':0.75}
-    },
-    {
-    'text' : 'minority\nadvantage',
+    'text' : 'maj.',
     'text_color' : small_annotation_color,
     'text_fontsize': 6,
     'text_fontstyle': 'italic',
-    'arrow_tip' :  (0.45, 0.80),
-    'arrow_tail' : (0.45, 0.80),
+    'arrow_tip' :  (-0.04, 0.88),
+    'arrow_tail' : (-0.04, 0.88),
     'arrow_props' :{
         'arrowstyle':'->',
         'color':'#586170',
         'lw':0.0}
     },
     {
-    'text' : '',
+    'text' : 'min.',
     'text_color' : small_annotation_color,
     'text_fontsize': 6,
     'text_fontstyle': 'italic',
-    'arrow_tip' :  (0.9, 0.15),
-    'arrow_tail' : (0.9, 0.45),
-    'arrow_props' :{
-        'arrowstyle':'->',
-        'color':'#586170',
-        'lw':0.75}
-    },
-    {
-    'text' : 'majority\nadvantage',
-    'text_color' : small_annotation_color,
-    'text_fontsize': 6,
-    'text_fontstyle': 'italic',
-    'arrow_tip' :  (0.45, 0.22),
-    'arrow_tail' : (0.45, 0.22),
+    'arrow_tip' :  (0.6, 0.88),
+    'arrow_tail' : (0.6, 0.88),
     'arrow_props' :{
         'arrowstyle':'->',
         'color':'#586170',
         'lw':0.0}
     }
 ]
-
 
 
 
@@ -231,17 +205,17 @@ legend_labels = [
 ]
 
 legend_linecolors = [
-        diffusion_style['colors_line']['linear'],
-        diffusion_style['colors_line']['sublinear'],
-        diffusion_style['colors_line']['superlinear'],
-        diffusion_style['colors_line']['asymmetric'],
+        violin_style['colors_line']['linear'][0],
+        violin_style['colors_line']['sublinear'][0],
+        violin_style['colors_line']['superlinear'][0],
+        violin_style['colors_line']['asymmetric'][0]
 ]
 
 legend_facecolors = [
-        diffusion_style['colors_line']['linear'],
-        diffusion_style['colors_line']['sublinear'],
-        diffusion_style['colors_line']['superlinear'],
-        diffusion_style['colors_line']['asymmetric'],
+        violin_style['colors_face']['linear'][0],
+        violin_style['colors_face']['sublinear'][0],
+        violin_style['colors_face']['superlinear'][0],
+        violin_style['colors_face']['asymmetric'][0]
 ]
 
 legend_fontsize = 7
@@ -250,9 +224,6 @@ legend_columnspacing = 0.5
 legend_coords = (0.5, 0.05)
 
 ### MAIN ###
-
-# initialize the random number generator for bootstrap
-rng = np.random.default_rng(seed=bootstrap_seed)
 
 ## load the data
 results = {}
@@ -288,38 +259,54 @@ fig = add_text(fig, gs[0,:], text_line, text_coords, text_style)
 for i, hg in enumerate(hypergraphs):
     
     if coordinates[i] == (1,0):
-        annotation_list = diffusion_annotations
+        annotation_list = violin_annotations
     else:
         annotation_list = []
             
-    sub_results_0 = {key[1] : val for key, val in results.items() if key[0]==0 and key[2]==hg}
-    sub_results_1 = {key[1] : val for key, val in results.items() if key[0]==1 and key[2]==hg}
+    sub_result = {key[1] : val for key, val in results.items() if key[0]==spm and key[2]==hg}
 
-    # diffusion fairness plot for a given dynamics
-    create_diffusion_fairness_plot(
+    violin_kdes, violin_vals, violin_xlimits, v_ylimits = compute_kde_violin(
+            sub_result,
+            npoints=violin_npoints,
+            xmin=violin_xmin,
+            xmax=violin_xmax,
+            percentile=percentile[i]
+    )
+
+    # update axis limits for ridge plot
+    violin_ylimits = [0.,0.]
+    if violin_ymin:
+        violin_ylimits[0] = violin_ymin
+    else:
+        violin_ylimits[0] = v_ylimits[0]
+    if violin_ymax:
+        violin_ylimits[1] = violin_ymax
+    else:
+        violin_ylimits[1] = v_ylimits[1]
+    violin_ylimits = tuple(violin_ylimits)
+
+    # create ridgeplot
+    fig = create_violinplot(
         fig,
         gs[coordinates[i]],
-        sub_results_0,
-        sub_results_1,
-        diffusion_xlim,
-        diffusion_ylim[coordinates[i]],
-        bootstrap_p,
-        bootstrap_num,
-        rng,
+        violin_vals, 
+        violin_kdes,
+        violin_xlimits,
+        violin_ylimits,
+        violin_hspace,
+        violin_wspace,
         yaxis_visible,
-        diffusion_xlabel,
-        diffusion_ylabel,
-        diffusion_yticks,
-        diffusion_yticklabels,
-        diffusion_xticks,
-        diffusion_xticklabels,
+        order,
+        violin_labels,
+        violin_threshold,
+        violin_ylabel,
         [abc[coordinates[i]], hypergraph_names[i]],
         annotation_coords,
         annotation_fontsizes,
         annotation_fontweights,
         annotation_colors,
         annotation_list,
-        diffusion_style
+        violin_style
     )
 
 

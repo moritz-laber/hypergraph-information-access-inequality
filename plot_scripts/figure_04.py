@@ -1,34 +1,35 @@
 """
-Figure 4 SI - 01
+Figure 4
 
-This script produces the analogoue of figure 04 in the
-main text for the supplementary information. The input
-needs to be prepared with prepare_data_synthetic.py.
+This script produces figure 04 in the main text,
+as well as the analogous figures in the SI. The 
+input needs to be prepared with prepare_data_synthetic.py.
 
 ML - 2025/05/12
 """
 
 ### IMPORT ###
-from plot_functions import *
 import matplotlib.gridspec as grid_spec
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 
+from plot_functions import *
+
 ### PARAMETERS ###
 
 # I/O Parameters
 stats_dir = './stats'
-output_path = './'
-figname = 'fig04_SI_01'
+output_path = '../'
+figname = 'fig04'
 
 # Figure Parameters
-figsize = (7.2, 5.2)   # inches
+figsize = (7.2, 7.2)   # inches
 figure_hspace = 0.75
 figure_wspace = 0.25
 figure_ncols = 4
-figure_nrows = 5
-figure_height_ratios = [0.1, 1.0, 1.0, 1.0, 0.05]
+figure_nrows = 8
+figure_height_ratios = [0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.05]
 figure_width_ratios = [1., 1., 1., 1.]
 dpi = 500
 
@@ -50,8 +51,8 @@ letter_fw = 'bold'
 name_fw = 'normal'
 s_fw = 'normal'
 
-letter_coord = (-0.75, 0.75)
-name_coord = (-0.75, 0.45)
+letter_coord = (-0.55, 0.75)
+name_coord = (-0.55, 0.45)
 s_coord = (0.5, 1.05)
 
 letter_c = 'k'
@@ -94,15 +95,21 @@ abc = {
 
 # Other Parameters
 hypergraphs = [
-    'primaryschool',
-    'senatebills',
-    'senatebillsgender_genderapi',
+    'aps_genderapi',
+    'dblp_genderapi',
+    'highschool',
+    'hospital',
+    'housebills',
+    'housebillsgender_genderapi'
 ]
 
 hypergraph_names = [
-    'Primary\nschool',
-    'Senate\n(Party)',
-    'Senate\n(Gender)',
+    'APS',
+    'DBLP',
+    'High\nschool',
+    'Hospital',
+    'House\n(Party)',
+    'House\n(Gender)'
 ]
 
 groups = [0,1]
@@ -127,9 +134,10 @@ bar_style = {
     'bar_linewidth' : 0.75,
     'bar_width' : 0.25,
     'label_rotation' : 0,
-    'ylabel_coords' : (-0.35, 0.25),
+    'ylabel_coords' : (-0.35, 0.15),
     'yticks_if_label' : [0.0, 1.0]
 }
+
 bar_xlabel = r'$r$'
 bar_ylabel = r'$h^{(g)}_{s,r}$'
 

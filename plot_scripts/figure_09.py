@@ -1,9 +1,8 @@
 """
-Figure 5
+Figure 9
 
-This script generates figure 05 in the main text,
-as well as the analogous figures in the SI. The 
-input needs to be prepared with prepare_data_synthetic.py.
+This script generates diffusion fairness plots
+for real-world hypergraphs.
 
 ML - 2025/05/12
 """
@@ -21,18 +20,18 @@ from plot_functions import *
 # I/O Parameters
 results_dir = './results'
 stats_dir = './stats'
-output_path = './'
-figname = 'fig05'
+output_path = '../'
+figname = 'fig09'
 
 hypergraphs = [
     'primaryschool',
     'highschool',
     'hospital',
     'housebills',
-    'housebillsgender_genderapi',
+    'housebillsgender_genderizerio',
     'aps_genderapi',
     'senatebills',
-    'senatebillsgender_genderapi', 
+    'senatebillsgender_genderizerio', 
     'dblp_genderapi'
 ]
 
@@ -87,14 +86,26 @@ abc = {
     (5,2) : "i"
 }
 
+diffusion_ylim = {
+    (1,0) : (0,1.5),
+    (1,1) : (0,1.5),
+    (1,2) : (0,1.5),
+    (3,0) : (0,5),
+    (3,1) : (0,35),
+    (3,2) : (0,1.5),
+    (5,0) : (0,5),
+    (5,1) : (0,1.5),
+    (5,2) : (0,1.5)
+}
+
 annotation_fontsizes = [12, 10]
 annotation_fontweights = ['bold', 'normal']
-annotation_coords = [(-0.10, 1.05), (0.50, 1.05)]
+annotation_coords = [(-0.1, 1.15), (0.45, 1.15)]
 
 annotation_colors = ['k', '#272c2d']
 small_annotation_color = '#525758'
 
-spm = 0.
+spm  = 1.
 
 text_style = {
     'fontsize' : 10,
@@ -102,75 +113,81 @@ text_style = {
     'fontweight' : 'bold'
 }
 
-text_coords = (-0.05, 0.05)
-text_line = "Information access inequality in real-world hypergraphs"
+text_coords = (-0.04, 0.4)
+text_line = "Diffusion fairness: Ability to disseminate information"
 
 # Figure Parameters
 figsize = (7.2, 7.2)   # inches
 figure_hspace = 0.75
-figure_wspace = 0.25
+figure_wspace = 0.45
 figure_ncols = 3
 figure_nrows = 8
-figure_height_ratios = [0.1, 1.0, 0.15, 1.0, 0.15, 1.0, 0.05, 0.05]
+figure_height_ratios = [0.2, 1.0, 0.15, 1.0, 0.15, 1.0, 0.01, 0.01]
 figure_width_ratios = [1., 1., 1.]
 dpi = 500
 
-# Ridge Plot Parameters
-ridge_hspace = -0.5
-ridge_wspace = 0.0
-ridge_order = order
-ridge_labels = labels
-ridge_xlabel = r'$d_W(\mathcal{Z}^{(0)},\mathcal{Z}^{(1)})$'
+# Bootstrap Parameters
+bootstrap_seed = 213
+bootstrap_num = 100
+bootstrap_p = 0.90
 
-ridge_xmin = 0.
-ridge_ymin = 0.
-ridge_ymax = None
-ridge_npoints = 200
+# Diffusion Fairness Parameters
 
-ridge_style = {
+diffusion_xlabel = r'$f$'
+diffusion_ylabel = r'$\delta(f)$'
+diffusion_yticks = None
+diffusion_yticklabels = None
+diffusion_xlim = (0., 0.9)
+diffusion_xticks = [0.0, 0.3, 0.6, 0.9]
+diffusion_xticklabels = ['0.0', '0.3', '0.6', '0.9']
+yaxis_visible = True
+
+diffusion_style = {
     'colors_line' : {
         'linear' : '#004563',
         'sublinear' : '#b679ae',
         'superlinear'  : '#8c2b2c',
         'asymmetric' : '#647f1a',
-        'axis' : 'k'
     },
-    'colors_face' : {
+    'colors_fill' : {
         'linear' : '#015e7e',
         'sublinear' : '#d294ca',
         'superlinear'  : '#a74341',
         'asymmetric' : '#7f9a36',
-        'axis' : 'k'
     },
+    'colors_axis' : 'k',
     'alpha_line' : 0.95,
-    'alpha_face' : 0.95,
+    'alpha_fill' : 0.5,
+    'linewidth' : 1,
     'linewidth_axis' : 1,
+    'linestyle_axis' : '--',
     'fontsize_xlabels' : 10,
+    'fontsize_ylabels' : 10,
     'fontsize_xticks'  : 9,
     'fontsize_yticks' : 9,
+    'label_rotation' : 40 
 }
 
-
-ridge_annotations = [
+diffusion_annotations = [
     {
     'text' : '',
     'text_fontsize': 6,
     'text_color' : small_annotation_color,
     'text_fontstyle': 'italic',
-    'arrow_tip' :  (-0.07, -0.8),
-    'arrow_tail' : (0.18, -0.8),
+    'arrow_tip' :  (0.9, 1.05),
+    'arrow_tail' : (0.9, 0.75),
     'arrow_props' :{
         'arrowstyle':'->',
         'color':'#586170',
         'lw':0.75}
     },
     {
-    'text' : 'more\nequal',
+    'text' : 'minority\nadvantage',
     'text_color' : small_annotation_color,
     'text_fontsize': 6,
     'text_fontstyle': 'italic',
-    'arrow_tip' :  (-0.02, -1.35),
-    'arrow_tail' : (-0.02, -1.35),
+    'arrow_tip' :  (0.45, 0.80),
+    'arrow_tail' : (0.45, 0.80),
     'arrow_props' :{
         'arrowstyle':'->',
         'color':'#586170',
@@ -181,26 +198,29 @@ ridge_annotations = [
     'text_color' : small_annotation_color,
     'text_fontsize': 6,
     'text_fontstyle': 'italic',
-    'arrow_tip' :  (1.07, -0.8),
-    'arrow_tail' : (0.82, -0.8),
+    'arrow_tip' :  (0.9, 0.15),
+    'arrow_tail' : (0.9, 0.45),
     'arrow_props' :{
         'arrowstyle':'->',
         'color':'#586170',
         'lw':0.75}
     },
     {
-    'text' : 'less\nequal',
+    'text' : 'majority\nadvantage',
     'text_color' : small_annotation_color,
     'text_fontsize': 6,
     'text_fontstyle': 'italic',
-    'arrow_tip' :  (0.87, -1.35),
-    'arrow_tail' : (0.87, -1.35),
+    'arrow_tip' :  (0.45, 0.22),
+    'arrow_tail' : (0.45, 0.22),
     'arrow_props' :{
         'arrowstyle':'->',
         'color':'#586170',
         'lw':0.0}
     }
 ]
+
+
+
 
 # Legend
 legend_labels = [
@@ -211,31 +231,31 @@ legend_labels = [
 ]
 
 legend_linecolors = [
-        ridge_style['colors_line']['linear'],
-        ridge_style['colors_line']['sublinear'],
-        ridge_style['colors_line']['superlinear'],
-        ridge_style['colors_line']['asymmetric']
+        diffusion_style['colors_line']['linear'],
+        diffusion_style['colors_line']['sublinear'],
+        diffusion_style['colors_line']['superlinear'],
+        diffusion_style['colors_line']['asymmetric'],
 ]
 
 legend_facecolors = [
-        ridge_style['colors_face']['linear'],
-        ridge_style['colors_face']['sublinear'],
-        ridge_style['colors_face']['superlinear'],
-        ridge_style['colors_face']['asymmetric']
+        diffusion_style['colors_line']['linear'],
+        diffusion_style['colors_line']['sublinear'],
+        diffusion_style['colors_line']['superlinear'],
+        diffusion_style['colors_line']['asymmetric'],
 ]
 
 legend_fontsize = 7
 legend_ncols = 4
+legend_columnspacing = 0.5
 legend_coords = (0.5, 0.05)
-legend_columnspacing = 2.0
-
 
 ### MAIN ###
 
+# initialize the random number generator for bootstrap
+rng = np.random.default_rng(seed=bootstrap_seed)
+
 ## load the data
 results = {}
-num_nodes = {}
-
 for hg in hypergraphs:
 
     with open(f'{results_dir}/{hg}_plotdata.pkl', 'rb') as f:
@@ -247,12 +267,6 @@ for hg in hypergraphs:
         key = (key[0], key[1], hg)
         
         results[key] = val
-
-    with open(f'{stats_dir}/{hg}.pkl', 'rb') as f:
-        
-        hg_stats = pickle.load(f)
-    
-    num_nodes[hg] = hg_stats['num_nodes'][0,2].astype('int')
 
 
 ## Create the main figure
@@ -273,72 +287,39 @@ fig = add_text(fig, gs[0,:], text_line, text_coords, text_style)
 ## Plot the different hypergraphs
 for i, hg in enumerate(hypergraphs):
     
-    if coordinates[i][1] == 0:
-        yaxis_visible = True
-        if coordinates[i][0] == 1:
-            annotation_list = ridge_annotations
-        else:
-            annotation_list = []
+    if coordinates[i] == (1,0):
+        annotation_list = diffusion_annotations
     else:
-        yaxis_visible = False
         annotation_list = []
+            
+    sub_results_0 = {key[1] : val for key, val in results.items() if key[0]==0 and key[2]==hg}
+    sub_results_1 = {key[1] : val for key, val in results.items() if key[0]==1 and key[2]==hg}
 
-    sub_result = {key[1] : val for key, val in results.items() if key[0]==spm and key[2]==hg}
-
-    # set x-axis limits for ridge plot
-    if 'aps' in hg or 'dblp' in hg:
-        ridge_xticks = [0.0, num_nodes[hg]/8., num_nodes[hg]/4.]
-        ridge_xticklabels = [r'$0.0$', r'$n/8$', r'$n/4$']
-        ridge_xmin = 0.
-        ridge_xmax = num_nodes[hg]/4.
-    else:
-        ridge_xticks = [0.0, num_nodes[hg]/4., num_nodes[hg]/2.]
-        ridge_xticklabels = [r'$0.0$', r'$n/4$', r'$n/2$']
-        ridge_xmin = 0.
-        ridge_xmax = num_nodes[hg]/2.
-
-    ridge_kdes, ridge_vals, ridge_xlimits, r_ylimits = compute_kde_ridge(
-            sub_result,
-            npoints=ridge_npoints,
-            xmin=ridge_xmin,
-            xmax=ridge_xmax
-    )
-
-    # update axis limits for ridge plot
-    ridge_ylimits = [0.,0.]
-    if ridge_ymin:
-        ridge_ylimits[0] = ridge_ymin
-    else:
-        ridge_ylimits[0] = r_ylimits[0]
-    if ridge_ymax:
-        ridge_ylimits[1] = ridge_ymax
-    else:
-        ridge_ylimits[1] = r_ylimits[1]
-    ridge_ylimits = tuple(ridge_ylimits)
-
-    # create ridgeplot
-    fig = create_ridgeplot(
+    # diffusion fairness plot for a given dynamics
+    create_diffusion_fairness_plot(
         fig,
         gs[coordinates[i]],
-        ridge_vals,
-        ridge_kdes,
-        ridge_xlimits,
-        ridge_ylimits,
-        ridge_wspace,
-        ridge_hspace,
-        ridge_order,
+        sub_results_0,
+        sub_results_1,
+        diffusion_xlim,
+        diffusion_ylim[coordinates[i]],
+        bootstrap_p,
+        bootstrap_num,
+        rng,
         yaxis_visible,
-        ridge_xlabel,
-        ridge_xticks,
-        ridge_xticklabels,
-        ridge_labels,
+        diffusion_xlabel,
+        diffusion_ylabel,
+        diffusion_yticks,
+        diffusion_yticklabels,
+        diffusion_xticks,
+        diffusion_xticklabels,
         [abc[coordinates[i]], hypergraph_names[i]],
         annotation_coords,
         annotation_fontsizes,
         annotation_fontweights,
         annotation_colors,
         annotation_list,
-        ridge_style
+        diffusion_style
     )
 
 

@@ -21,7 +21,7 @@ from plot_functions import create_figure, add_text
 
 # Paths
 base_path = None
-output_path = './'
+output_path = '../'
 figname = 'edgesize_distributions'
 
 # Datasets

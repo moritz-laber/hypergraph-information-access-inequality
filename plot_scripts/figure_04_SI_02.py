@@ -20,7 +20,7 @@ from plot_functions import *
 
 # I/O Parameters
 stats_dir = './stats'
-output_path = './'
+output_path = '../'
 figname = 'fig04_SI_02'
 
 # Figure Parameters

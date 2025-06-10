@@ -21,7 +21,7 @@ from plot_functions import *
 # I/O Parameters
 results_dir = './results'
 stats_dir = './stats'
-output_path = './'
+output_path = '../'
 figname = 'fig05_SI'
 
 hypergraphs = [

@@ -20,7 +20,7 @@ from plot_functions import *
 
 # I/O Parameters
 base_path = './metadata/'
-output_path = './'
+output_path = '../'
 figname = 'fig_genderlabeling'
 
 hypergraphs = [
