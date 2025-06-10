@@ -57,49 +57,60 @@ import networkx as nx
 from tqdm import tqdm
 tqdm.pandas()
 import statistics
-import graph_tool as gt
+import warnings
+#import graph_tool as gt
+#from graph_tool.topology import label_largest_component
 from pathlib import Path
 from typing import Optional
+import requests
+import shutil
 
 from HyperGraph import *
 
 
-def generate_benson_metadata(base_path: str='data/real_world/'):
+def generate_benson_metadata(dataset: str, base_path: str='data/real_world/'):
     """
     Generate and save metadata files for the Benson house and senate bill datasets.
 
     Parameters:
+        dataset: str, the name of the dataset
         base_path: str, file path to raw data
 
     Returns: none
     """
     # House bills
-    house_path = Path(base_path) / 'housebills'
-    house_names = house_path / 'node-names-house-bills.txt'
-    house_labels = house_path / 'node-labels-house-bills.txt'
+    if dataset == 'housebills':
+        house_path = Path(base_path) / 'housebills'
+        house_names = house_path / 'node-names-house-bills.txt'
+        house_labels = house_path / 'node-labels-house-bills.txt'
 
-    if not house_names.exists() or not house_labels.exists():
-        raise FileNotFoundError("Missing house bill data: expected 'node-names-house-bills.txt' and 'node-labels-house-bills.txt'.")
+        if not house_names.exists() or not house_labels.exists():
+            raise FileNotFoundError("Missing house bill data: expected 'node-names-house-bills.txt' and 'node-labels-house-bills.txt'.")
 
-    house_metadata = pd.read_csv(house_names, delimiter=';')
-    house_party = pd.read_csv(house_labels, delimiter=';')
-    house_metadata['id'] = list(range(1, len(house_metadata) + 1))
-    house_metadata['party'] = house_party['party']
-    house_metadata.to_csv(house_path / 'metadata.csv', index=False)
+        house_metadata = pd.read_csv(house_names, delimiter=';', header=None, names=['name'])
+        house_party = pd.read_csv(house_labels, delimiter=';', header=None, names=['party'])
+
+        house_metadata['id'] = list(range(1, len(house_metadata) + 1))
+        house_metadata['party'] = house_party['party']
+        house_metadata['party'] = house_metadata['party'].replace({'1': 'dem', '2': 'rep', 1: 'dem', 2: 'rep'})
+        house_metadata.to_csv(house_path / 'metadata.csv', index=False)
 
     # Senate bills
-    senate_path = Path(base_path) / 'senatebills'
-    senate_names = senate_path / 'node-names-senate-bills.txt'
-    senate_labels = senate_path / 'node-labels-senate-bills.txt'
+    elif dataset == 'senatebills':
+        senate_path = Path(base_path) / 'senatebills'
+        senate_names = senate_path / 'node-names-senate-bills.txt'
+        senate_labels = senate_path / 'node-labels-senate-bills.txt'
 
-    if not senate_names.exists() or not senate_labels.exists():
-        raise FileNotFoundError("Missing senate bill data: expected 'node-names-senate-bills.txt' and 'node-labels-senate-bills.txt'.")
+        if not senate_names.exists() or not senate_labels.exists():
+            raise FileNotFoundError("Missing senate bill data: expected 'node-names-senate-bills.txt' and 'node-labels-senate-bills.txt'.")
 
-    senate_metadata = pd.read_csv(senate_names, delimiter=';')
-    senate_party = pd.read_csv(senate_labels, delimiter=';')
-    senate_metadata['id'] = list(range(1, len(senate_metadata) + 1))
-    senate_metadata['party'] = senate_party['party']
-    senate_metadata.to_csv(senate_path / 'metadata.csv', index=False)
+        senate_metadata = pd.read_csv(senate_names, delimiter=';', header=None, names=['name'])
+        senate_party = pd.read_csv(senate_labels, delimiter=';', header=None, names=['party'])
+
+        senate_metadata['id'] = list(range(1, len(senate_metadata) + 1))
+        senate_metadata['party'] = senate_party['party']
+        senate_metadata['party'] = senate_metadata['party'].replace({'1': 'dem', '2': 'rep', 1: 'dem', 2: 'rep'})
+        senate_metadata.to_csv(senate_path / 'metadata.csv', index=False)
 
 
 def format_dblp_data(base_path: str='data/real_world/'):
@@ -143,7 +154,6 @@ def rework_indices(metadata: pd.DataFrame, edge_list: pd.DataFrame, folder: str,
 
     Returns: none
     """
-
     # Assign a new 'node_id' to each row in the metadata DataFrame (fix range to [0, num_nodes-1])
     metadata['node_id'] = list(metadata.index)
     node_mapping = dict(zip(metadata['id'], metadata['node_id']))
@@ -159,7 +169,7 @@ def rework_indices(metadata: pd.DataFrame, edge_list: pd.DataFrame, folder: str,
     else:
         # Save original edges; map edges to new node ids
         edge_list = edge_list.rename(columns={'hyperedges': 'orig_hyperedges'})
-        hyperedges = [[int(item) for item in row.split(',')] for row in edge_list['orig_hyperedges']]
+        hyperedges = edge_list['orig_hyperedges'].tolist()
         mapped_hyperedges = [[node_mapping[item] for item in sublist] for sublist in hyperedges]
         edge_list['hyperedges'] = [','.join(map(str, sublist)) for sublist in mapped_hyperedges]
         edge_list.to_csv(f'data/real_world/{folder}/{folder}.csv', index=False)
@@ -179,21 +189,28 @@ def get_LCC(metadata: pd.DataFrame, edge_list: pd.DataFrame, folder: str, base_p
     Returns: none
     """
 
+    metadata['node_id'] = metadata['node_id'].astype(int)
     nodes = list(metadata['node_id'])
+    edge_list = edge_list.dropna()
 
     if not benson_dblp:
+        edge_list['id1'] = edge_list['id1'].astype(int)
+        edge_list['id2'] = edge_list['id2'].astype(int)
+
         g = ig.Graph()
-        g.add_vertices(nodes)
-        g.add_edges(zip(edge_list['id1'], edge_list['id2']))
-        lcc_nodes = set(g.clusters().giant().vs['name'])
+        g.add_vertices(max(nodes) + 1)
+        g.vs['name'] = nodes
+        g.add_edges(list(zip(edge_list['id1'], edge_list['id2'])))
+        lcc_nodes = set(g.connected_components().giant().vs['name'])
 
     else:
-        g = gt.Graph(n=len(nodes), directed=False)
+        g = gt.Graph(directed=False)
+        g.add_vertex(len(nodes))
         hyperedges = [[int(i) for i in row.split(',')] for row in edge_list['hyperedges']]
         hyperedges = [edge for edge in hyperedges if len(edge) > 1]
         edge_pairs = (pair for edge in hyperedges for pair in combinations(edge, 2))
         g.add_edge_list(edge_pairs)
-        lcc_mask = gt.label_largest_component(g)
+        lcc_mask = label_largest_component(g)
         lcc_nodes = {i for i, included in enumerate(lcc_mask.a) if included}
 
     metadata['in_lcc'] = metadata['node_id'].isin(lcc_nodes)
@@ -212,12 +229,6 @@ def clean(datasets: List[str], data_dir: str = 'data/real_world/'):
     """
 
     # Generate metadata if needed
-    if 'housebills' in datasets or 'senatebills' in datasets:
-        try:
-            generate_benson_metadata(base_path=data_dir)
-        except Exception as e:
-            print("[Error] Failed to generate Benson metadata:", e)
-
     if 'dblp' in datasets:
         try:
             format_dblp_data(base_path=data_dir)
@@ -228,8 +239,40 @@ def clean(datasets: List[str], data_dir: str = 'data/real_world/'):
     for dataset in datasets:
         path = Path(data_dir) / dataset
         try:
-            metadata = pd.read_csv(path / 'metadata.csv')
-            data = pd.read_csv(path / f'{dataset}.csv')
+            if dataset == 'primaryschool' or 'highschool' in dataset:
+                metadata = pd.read_csv(path / 'metadata.csv', sep=r"\s+", header=None)
+                metadata.columns = ["id", "class", "gender"]
+                metadata = metadata[metadata['gender'] != 'Unknown']
+
+                data = pd.read_csv(path / f'{dataset}.csv', sep=r"\s+", header=None)
+                data.columns = ['time', 'id1', 'id2', 'class1', 'class2']
+                data = data[(data['class1'] != 'Teachers') & (data['class2'] != 'Teachers')]
+
+            #elif dataset == 'hospital':
+            elif 'hospital' in dataset:
+                data = pd.read_csv(path / f'{dataset}.csv', sep=r"\s+", header=None)
+                data.columns = ['time', 'id1', 'id2', 'group1', 'group2']
+
+                df1 = data[['id1', 'group1']].rename(columns={'id1': 'id', 'group1': 'group'})
+                df2 = data[['id2', 'group2']].rename(columns={'id2': 'id', 'group2': 'group'})
+
+                metadata = pd.concat([df1, df2], ignore_index=True).drop_duplicates()
+                metadata = metadata.groupby('id')['group'].agg(lambda x: x.mode()[0]).reset_index()
+
+            elif dataset == 'housebills' or dataset == 'senatebills':
+                generate_benson_metadata(dataset, base_path=data_dir)
+
+                metadata = pd.read_csv(path / 'metadata.csv')
+                with open(path / f'{dataset}.csv', 'r') as f:
+                    lines = f.read().splitlines()
+                hyperedges = [list(map(int, line.split(','))) for line in lines]
+                data = pd.DataFrame({'hyperedges': hyperedges})
+
+
+            else:
+                metadata = pd.read_csv(path / 'metadata.csv')
+                data = pd.read_csv(path / f'{dataset}.csv')
+
         except FileNotFoundError as e:
             print(f"[Warning] Skipping '{dataset}' due to missing file:", e)
             continue
@@ -239,8 +282,9 @@ def clean(datasets: List[str], data_dir: str = 'data/real_world/'):
         benson_dblp = benson or dblp
 
         try:
-            rework_indices(metadata, data, dataset, base_path=data_dir, benson_dblp=benson_dblp)
-            get_LCC(metadata, data, dataset, base_path=data_dir, benson_dblp=benson_dblp)
+            rework_indices(metadata, data, dataset, benson_dblp=benson_dblp)
+            edge_list = pd.read_csv(path / f'{dataset}.csv')
+            get_LCC(metadata, edge_list, dataset, base_path=data_dir, benson_dblp=benson_dblp)
         except Exception as e:
             print(f"[Error] Failed to process '{dataset}':", e)
 
@@ -294,14 +338,16 @@ def label_gender_single(dataset: str, gender_api_key: str, genderize_io_key: str
         raise FileNotFoundError(f"[label_gender_single] Missing file: {fp}")
 
     df = pd.read_csv(fp)
+    #df = df[['name', 'id', 'party', 'node_id', 'in_lcc', 'lcc_id']]
+    #df = df.to_csv(fp, index=False)
 
     # Determine name column
     if 'first_name' in df.columns:
         col = 'first_name'
     elif 'new_first_name' in df.columns:
         col = 'new_first_name'
-    elif 'names' in df.columns:
-        df[['first_name', 'last_name']] = df['names'].apply(lambda x: pd.Series(split_author(x)))
+    elif 'name' in df.columns:
+        df[['first_name', 'last_name']] = df['name'].apply(lambda x: pd.Series(split_author(x)))
         col = 'first_name'
     else:
         raise ValueError(f"No valid name field found in metadata for {dataset}")
@@ -375,42 +421,103 @@ def get_gender(df: pd.DataFrame, col: str, gender_api_key: str, genderize_io_key
         gender_api_dict: dictionary, results from GenderAPI
         genderize_io_dict: dictionary, results from Genderize.io
         df: dataframe, names to gender label with new gender columns
-    """
-
-    # set up dictionaries to store API results
+        """
     gender_api_dict = {}
     genderize_io_dict = {}
 
-    # loop through dataframe, make API call, and save relevent results in the dataframe
     for idx, row in tqdm(df.iterrows(), total=len(df)):
+        name = row[col]
+
+        if gender_api_key == 'skip' and genderize_io_key == 'skip':
+            # Assign dummy values
+            df.at[idx, 'genderapi_gender'] = 'unknown'
+            df.at[idx, 'genderapi_p'] = 0.0
+            df.at[idx, 'genderapi_n'] = 0
+            df.at[idx, 'genderizeio_gender'] = 'unknown'
+            df.at[idx, 'genderizeio_p'] = 0.0
+            df.at[idx, 'genderizeio_n'] = 0
+            continue
+
         try:
-            # make call + save results from GenderAPI
-            result = gender_api(row[col], gender_api_key)
+            result = gender_api(name, gender_api_key)
             if result:
                 df.at[idx, 'genderapi_gender'] = result.get('gender')
                 df.at[idx, 'genderapi_p'] = result.get('accuracy') / 100
                 df.at[idx, 'genderapi_n'] = result.get('samples')
-
                 gender_api_dict[idx] = result
         except:
-            continue
+            pass
 
         try:
-            # make call + save results from Genderize.io
-            result = genderize_io(row[col], genderize_io_key)
+            result = genderize_io(name, genderize_io_key)
             if result:
-                gender = result.get('gender')
-                if not gender:
-                    gender = 'unknown'
+                gender = result.get('gender') or 'unknown'
                 df.at[idx, 'genderizeio_gender'] = gender
                 df.at[idx, 'genderizeio_p'] = result.get('probability')
                 df.at[idx, 'genderizeio_n'] = result.get('count')
-
                 genderize_io_dict[idx] = result
         except:
-            continue
+            pass
 
     return gender_api_dict, genderize_io_dict, df
+
+
+def gender_api(name, api_key):
+    """
+    Make calls to Genderize.io to gender-label names.
+
+    Parameters:
+        name: string, name to genderlabel
+        api_key: string, API key to access Genderize.io
+
+    Return:
+        result: dictionary of results from API call
+    """
+
+    # set up parameters for API call
+    url = f"https://gender-api.com/get"
+    params = {
+        'name': name,
+        'key': api_key
+    }
+
+    # make API call and return the result
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        result = response.json()
+        return result
+    else:
+        print(f"Failed to fetch data for {name}")
+        return pd.Series([None, None])
+
+
+def genderize_io(name: str, api_key: str):
+    """
+    Make calls to Genderize.io to gender-label names.
+
+    Parameters:
+        name: string, name to genderlabel
+        api_key: string, API key to access Genderize.io
+
+    Return:
+        result: dictionary of results from API call
+    """
+
+    # set up parameters for API call
+    url = f"https://api.genderize.io/"
+    params = {
+        'name': name,
+        'apikey': api_key
+    }
+
+    # make API call and return the result
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        result = response.json()
+        return result
+    else:
+        print(f"Failed to fetch data for {name}")
+        return pd.Series([None, None])
 
 
 def combine_chunked_gender_data(dataset: str, base_path: str, num_chunks: int):
@@ -587,16 +694,28 @@ def gender_label_and_clean_batch(datasets: List[str], gender_api_key: str, gende
             elif dataset in ['housebills', 'senatebills']:
                 label_gender_single(dataset, gender_api_key, genderize_io_key, base_path)
 
-                # Copy labeled file to new folder (e.g., senatebillsgender/)
                 gendered_folder = dataset + 'gender'
                 gendered_path = Path(base_path) / gendered_folder
                 gendered_path.mkdir(parents=True, exist_ok=True)
 
                 src = Path(base_path) / dataset / 'metadata.csv'
                 dest = gendered_path / 'metadata.csv'
-                src.rename(dest)
+                shutil.copy(src, dest)
 
-                dataset = gendered_folder  # update dataset name for step 2
+                pkl1 = Path(base_path) / dataset / 'gender_api.pkl'
+                pkl2 = Path(base_path) / dataset / 'genderize_io.pkl'
+                if pkl1.exists():
+                    shutil.move(pkl1, gendered_path / 'gender_api.pkl')
+                if pkl2.exists():
+                    shutil.move(pkl2, gendered_path / 'genderize_io.pkl')
+
+                original_csv = Path(base_path) / dataset / f"{dataset}.csv"
+                renamed_csv = gendered_path / f"{gendered_folder}.csv"
+                if original_csv.exists():
+                    shutil.copy(original_csv, renamed_csv)
+
+                # Update dataset name for Step 2
+                dataset = gendered_folder
 
             # Step 2: Clean gender labels
             df = pd.read_csv(Path(base_path) / dataset / 'metadata.csv')
@@ -723,10 +842,10 @@ def get_node_info(metadata: pd.DataFrame, hyperedges: List[List[int]], name: str
             metadata.to_csv(f'data/real_world/{name}/metadata.csv', index=False)
 
         df = lcc_df
-        nodes = list(df['lcc_id'])
+        nodes = list(df['lcc_id'].astype(int))
     else:
         df = metadata
-        nodes = list(df['node_id'])
+        nodes = list(df['node_id'].astype(int))
 
     # Assign groups
     if gender_probs:
@@ -737,13 +856,13 @@ def get_node_info(metadata: pd.DataFrame, hyperedges: List[List[int]], name: str
     elif 'school' in name:
         group = [1 if g == 'F' else 0 for g in df['gender']]
     elif benson:
-        group = [1 if p == 2 else 0 for p in df['party']]
+        group = [1 if p == 'rep' else 0 for p in df['party']]
     elif dblp:
         raise NotImplementedError("DBLP gender group not yet handled.")
     else:
         group = [1 if g == 'PAT' else 0 for g in df['group']]
 
-    node_map = dict(zip(metadata['node_id'], metadata.get('lcc_id', metadata['node_id'])))
+    node_map = dict(zip(df['node_id'], df.get('lcc_id', df['node_id'])))
     reindexed_edges = [[node_map[n] for n in edge if n in node_map] for edge in hyperedges]
 
     return nodes, group, reindexed_edges
@@ -893,13 +1012,14 @@ def compute_pred_gender_statistics(datasets: List[str], num_hypergraphs: int=1, 
 
 
 def main():
+    warnings.filterwarnings('ignore')
 
     # Step 1: Clean data and compute LCCs
     clean(
         datasets=['highschool', 'primaryschool', 'hospital', 'senatebills', 'housebills', 'dblp', 'aps'],
         data_dir='data/real_world/'
     )
-
+    
     # Step 2: Gender label (skip or comment if already labeled)
     GENDER_API_KEY = None  # replace with your API key for GenderAPI
     GENDERIZE_IO_KEY = None  # replace with your API key for genderize.io
@@ -910,13 +1030,13 @@ def main():
         split_chunks=True,  # must be True for 'dblp' and 'aps'
         chunk_size=1000
     )
-
+    
     # Step 3: Generate hypergraphs
     generate_lcc_hypergraphs(
         datasets=['highschool', 'primaryschool', 'hospital', 'senatebills', 'housebills'],
         base_path='data/real_world/',
         pred_gender=False,
-        num_hypergraphs=1000
+        num_hypergraphs=1
     )
     generate_lcc_hypergraphs(
         datasets=['senatebillsgender', 'housebillsgender', 'dblp', 'aps'],
@@ -924,7 +1044,7 @@ def main():
         pred_gender=True,
         num_hypergraphs=1000
     )
-
+    
     # Step 4: Compute summary statistics
     compute_statistics(
         datasets=['highschool', 'hospital', 'primaryschool', 'housebills', 'senatebills']
