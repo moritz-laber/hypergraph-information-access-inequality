@@ -78,7 +78,6 @@ def write_params(file_path:str, p_m:float, edge_counts:Dict[int, Dict[int,int]],
         hg_file_path: string, path to hypergraph object
         real_pred_gender: bool, whether the real world data uses predicted gender
     """
-    # os.chdir(file_path)
 
     # overwrite constants if we have a real world hypergraph
     if real_world_hg:
@@ -92,7 +91,6 @@ def write_params(file_path:str, p_m:float, edge_counts:Dict[int, Dict[int,int]],
         edge_size = list(real_world_hg.m.keys())
         num_seed = 1
 
-        # constants first
         params = {
             'num_runs': num_runs,
             'num_seed_cond': NUM_SEED_COND,
@@ -113,7 +111,6 @@ def write_params(file_path:str, p_m:float, edge_counts:Dict[int, Dict[int,int]],
             'hg_file_path': hg_file_path
         }
     else:
-        # constants first
         params = {
             'num_runs': NUM_RUNS,
             'num_seed_cond': NUM_SEED_COND,
@@ -142,6 +139,7 @@ def write_params(file_path:str, p_m:float, edge_counts:Dict[int, Dict[int,int]],
 
     # make the directory if it doesn't exist
     os.makedirs(file_path, exist_ok=True)
+
     # check to make sure the params.json file doesn't already exist
     if os.path.exists(f'{file_path}params.json'):
         print(f'File {file_path}params.json already exists')
@@ -165,9 +163,15 @@ def generate_params(file_path:str='data/', real_world:str=None, hg_file_path:str
     p_ms = [0.25, 0.5]
     sp_ms = [0.0, 'prop', 1.0]  # use prop to set sp_m = p_m
 
-    homophilies = ['weak', 'neutral', 'het', 'neutralweak3', 'weakneutral3', 'hetweak3', 'weakhet3']
+    homophilies = ['weak', 'neutral', 'het', 'neutralweak3', 'weakneutral3', 'hetneutral3', 'neutralhet3']
     if not nus:
-        nus = [(1.0, 1.0), (2.0, 2.0), (0.5, 0.5), (2.0, 0.5)]
+        if real_world:
+            if real_world == 'housebills' or real_world == 'senatebills':
+                nus = [(1.0, 1.0), (1.33, 1.33), (0.75, 0.75), (1.33, 0.75)]
+            else:
+                nus = [(1.0, 1.0), (1.11, 1.11), (0.9, 0.9), (1.11, 0.9)]
+        else:
+            nus = [(1.0, 1.0), (2.0, 2.0), (0.5, 0.5), (2.0, 0.5)]
     if not lams:
         lams = [(0.01, 0.01), (0.01, 0.01), (0.01, 0.01), (0.02, 0.005)]
 
@@ -181,7 +185,6 @@ def generate_params(file_path:str='data/', real_world:str=None, hg_file_path:str
         sp_ms = [0.0, 1.0]
         homophilies = [real_world]
 
-        seed_strategies = ['degree']
         try:
             with open(hg_file_path, 'rb') as f:
                 hg = pkl.load(f)
@@ -334,7 +337,7 @@ def get_edge_counts(h:str, p_m:float) -> Dict[int, Dict[int, int]]:
             m = {2: {0: 6255, 1: 12500, 2: 6245}, 3: {0: 800, 1: 5200, 2: 5200, 3: 800}, 4: {0: 193, 1: 1604, 2: 2406, 3: 1604, 4: 193}}     # these are the same as above but add 3 edges that mirror what the 4 edges are doing
         else:
             raise ValueError('Invalid homophily value')
-    
+
     # imbalanced	
     elif p_m== 0.25:
         if h=='neutral':
@@ -367,6 +370,7 @@ def get_params(file_path:str):
     Returns:
         params: dict, dictionary of parameters
     """
+
     # change to the directory with the json file
     with open(f'{file_path}params.json', 'r') as f:
         params = json.load(f)
@@ -412,7 +416,6 @@ def run(params, file_path, hypergraphs_only=False, read_hypergraph=False, includ
         real_pred_gender: bool, whether the real-world data uses predicted gender
     Returns:None
     """
-    print('reading params')
     # hypergraph params
     num_runs = params.get('num_runs', 10)
     num_seed_cond = params.get('num_seed_cond', 10)
@@ -439,26 +442,21 @@ def run(params, file_path, hypergraphs_only=False, read_hypergraph=False, includ
     
     if seed_test:
         seed_strategies = ['degree', 'hyper_core', 'k_core', 'random']
-    print('done w/ params, about to make edge_counts')
     # make all the edge_counts keys ints and the keys of the values ints
     if not real_world:
         edge_counts = {int(k): {int(kk): v for kk, v in v.items()} for k, v in edge_counts.items()}
-    print('done with edge_counts, about to make n0 n1')
     n1 = int(num_nodes * p_m)
     n0 = num_nodes - n1
-    print('done with n0 n1')
     # set up dictionary for seed generation time
     time_data = {'fp': [], 'hg': [], 'degree': [], 'hyper_core': [], 'k_core': [], 'random': []}
 
     # run for a num_hg hypergraphs
     for i in tqdm.tqdm(range(num_hg)):
-        print('inside for loop')
         if real_world:
             if real_pred_gender:
                 path_to_hg = original_path + str(i) + '.pkl'
             else:
                 path_to_hg = original_path
-        print(f'Running hypergraph {i}')
 
         # generate the degree sampler
         degree_seed += 1
@@ -477,9 +475,7 @@ def run(params, file_path, hypergraphs_only=False, read_hypergraph=False, includ
         
         if read_hypergraph: # read in hypergraph
             if real_world:
-                print('getting hypergraph')
                 edges, group, kappa = get_hypergraph(file_path, i, path_to_hg)
-                print('got hypergraph')
             else:
                 edges, group, kappa = get_hypergraph(file_path, i)
         else: # generate hypergraph
@@ -490,9 +486,7 @@ def run(params, file_path, hypergraphs_only=False, read_hypergraph=False, includ
                 pkl.dump((edges, group, kappa), f)
             continue
 
-        print('creating hASI object')
         hASI = HyperGraphAsymmetricSI(nodes=np.arange(0, num_nodes), edges=edges, group=group, nus=np.array([[nu[0],nu[1]],[nu[1],nu[0]]]), lams=np.array([[lam[0],lam[1]],[lam[1],lam[0]]]), fast=FAST, samplable_set=SAMPLABLE_SET)
-        print('created hASI object')
         # project hypergraph to pairwise graph
         if include_pairwise:
             H = HyperGraph(nodes=np.arange(0, num_nodes), edges=edges, group=group, fast=FAST)
@@ -512,9 +506,7 @@ def run(params, file_path, hypergraphs_only=False, read_hypergraph=False, includ
                 end = time.time()
                 elapsed = end-start
                 
-                # print(seed_strategy)
                 time_data[seed_strategy].append(elapsed)
-                print('about to run simulation')
                 run_simulation(seeds, hASI, i, seed_strategy, j, num_runs=num_runs, file_path=file_path, seed_test=seed_test)
                 if include_pairwise:
                     run_simulation(seeds, hASI_pairwise, i, seed_strategy, j, num_runs=num_runs, file_path=file_path,
@@ -570,7 +562,7 @@ def run_simulation(seeds:ArrayLike, hASI:HyperGraph, iter:int, seed_strategy:str
         pkl.dump(results, f)
 
 
-def run_all(file_path='./', hypergraphs_only=False, read_hypergraph=False, include_pairwise=False, seed_test=False, real_world=False, real_pred_gender=False, nu=None):
+def run_all(file_path='./', hypergraphs_only=False, read_hypergraph=False, include_pairwise=False, seed_test=False, real_world=False, real_pred_gender=False):
     """
     Run all the simulations and writes the results to the file with the params.json
     Parameters:
@@ -585,28 +577,55 @@ def run_all(file_path='./', hypergraphs_only=False, read_hypergraph=False, inclu
 
     # get the directories in the file_path
     dirs = os.listdir(file_path)
-    if nu:
-        lam_vals = [0.0825, 0.085, 0.0875, 0.09, 0.0925, 0.095, 0.0975, 0.10]
-        # dirs = [d for d in dirs if os.path.isdir(f'{file_path}{d}') and '__pycache__' not in d and f'nu({nu},' in d]
-        directs = []
-        for y in lam_vals:
-            directs.extend([d for d in dirs if os.path.isdir(
-                f'{file_path}{d}') and '__pycache__' not in d and f'nu({nu},' in d and f'lam(0.01, {y}' in d])
-            # dirs = [d for d in dirs if os.path.isdir(f'{file_path}{d}') and '__pycache__' not in d and f'nu({nu},' in d and f'lam(0.01, {y}' in d]
-        dirs = directs
-    else:
-        dirs = os.listdir(file_path)
 
     for dir in tqdm.tqdm(dirs):
-        if os.path.isdir(dir) and not 'pycache' in dir:
-            print(f'Running simulations for {dir}')
-            file_path_dir = f'{file_path}{dir}/'
-            params = get_params(file_path_dir)
-            run(params, file_path_dir, hypergraphs_only=hypergraphs_only, read_hypergraph=read_hypergraph, include_pairwise=include_pairwise, seed_test=seed_test, real_world=real_world, real_pred_gender=real_pred_gender)
+        print(f'Running simulations for {dir}')
+        file_path_dir = f'{file_path}{dir}/'
+        params = get_params(file_path_dir)
+        run(params, file_path_dir, hypergraphs_only=hypergraphs_only, read_hypergraph=read_hypergraph, include_pairwise=include_pairwise, seed_test=seed_test, real_world=real_world, real_pred_gender=real_pred_gender)
+
 
 def main():
 
-    run_all(file_path= './', hypergraphs_only=False, read_hypergraph=False, include_pairwise=False, seed_test=False)
+    # Synthetic simulations
+
+    # step 1: generate_params
+    generate_params()
+
+    # step 2: generate hypergraphs and run simulation
+    #   Note: setting hypergraphs_only to True will generate hypergraphs without running contagion
+    run_all(file_path= 'data/', hypergraphs_only=False, read_hypergraph=False, include_pairwise=False, seed_test=False)
+
+
+    # Real-world simulations
+
+    # non-predicted gender hypergraphs
+    datasets = ['hospital', 'highschool', 'primaryschool', 'housebills', 'senatebills']
+
+    for dataset in datasets:
+        # step 1: generate_params
+        generate_params(file_path=f'data/real_world/{dataset}/simulations/', real_world=dataset, hg_file_path=f'data/real_world/{dataset}/hypergraphs/{dataset}_lcc_hg.pkl', real_pred_gender=False)
+
+        # step 2: run simulation
+        #   Note: must set read_hypergraph to True for real_wold data
+        #   Note: real_world must be set to True
+        run_all(file_path=f'data/real_world/{dataset}/simulations/', hypergraphs_only=False, read_hypergraph=True, include_pairwise=False, seed_test=False, real_world=True, real_pred_gender=False)
+
+    # predicted gender hypergraphs
+    datasets = ['housebillsgender', 'senatebills', 'dblp', 'aps']
+
+    for dataset in datasets:
+        # step 1: generate_params
+        generate_params(file_path=f'data/real_world/{dataset}/simulations_genderapi/', real_world=dataset, hg_file_path=f'data/real_world/{dataset}/hypergraphs_genderapi/hg_lcc_', real_pred_gender=True)
+        generate_params(file_path=f'data/real_world/{dataset}/simulations_genderizerio/', real_world=dataset, hg_file_path=f'data/real_world/{dataset}/hypergraphs_genderizerio/hg_lcc_', real_pred_gender=True)
+
+        # step 2: run simulation
+        #   Note: must set read_hypergraph to True for real_wold data
+        #   Note: real_world must be set to True
+        #   Note: real_pred_gender must be set to True
+        run_all(file_path=f'data/real_world/{dataset}/simulations_genderapi/', hypergraphs_only=False, read_hypergraph=True, include_pairwise=False, seed_test=False, real_world=True, real_pred_gender=True)
+        run_all(file_path=f'data/real_world/{dataset}/simulations_genderizerio/', hypergraphs_only=False, read_hypergraph=True, include_pairwise=False, seed_test=False, real_world=True, real_pred_gender=True)
+
 
 if __name__=='__main__':
     main()
