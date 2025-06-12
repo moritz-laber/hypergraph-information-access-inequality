@@ -74,23 +74,24 @@ After downloading and renaming the data as explained above, ensure that the foll
 ```
 data/real_world/
 ├── highschool/
-│   └── edges.csv
+│   ├── highschool.csv
+│   └── metadata.csv
 ├── primaryschool/
-│   └── edges.csv
+│   ├── primaryschool.csv
+│   └── metadata.csv
 ├── hospital/
-│   └── edges.csv
+│   └── hospital.csv
 ├── housebills/
-│   ├── node-names-house-bills.txt
-│   └── node-labels-house-bills.txt
+│   ├── housebills.csv
+│   └── metadata.csv
 ├── senatebills/
-│   ├── node-names-senate-bills.txt
-│   └── node-labels-senate-bills.txt
+│   ├── senatebills.csv
+│   └── metadata.csv
 ├── dblp/
-│   ├── author.csv
-│   └── edge_list.csv
+│   └── dblp.csv
 ├── aps/
-│   ├── author.csv
-│   └── edge_list.csv
+│   ├── aps.csv
+│   └── metadata.csv
 ```
 
 Each dataset must include the appropriate metadata and either edge lists or hyperedge definitions as shown. You can then use the script `real_world.py` as shown in `tutorial.ipynb` to generate real-world hypergraphs and simulate contagion over the hypergraphs.
