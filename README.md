@@ -20,7 +20,7 @@ If you found this code useful for your own research, please cite our paper.
 }
 ````
 
-## 📂 Repository Structure
+## Repository Structure
 
 ### Interactive Tutorial
 - `tutorial.ipynb`: Step-by-step walkthrough of the framework, including:
