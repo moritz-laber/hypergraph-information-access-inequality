@@ -12,11 +12,11 @@ Finally, we provide scripts that were used to preprocess to conduct simulations,
 If you found this code useful for your own research, please cite our paper.
 
 ```
-@article{laber2025,
-  title = {Effects of Higher-Order Interactions and Homophily on Information Access Inequality},
-  author = {Laber, Moritz and Dies, Samantha and Ehlert, Joseph and Klein, Brennan and Eliassi-Rad, Tina},
-  year = {2025},
-  doi = {doi},
+@article{laber2025effects,
+  title={Effects of higher-order interactions and homophily on information access inequality},
+  author={Laber, Moritz and Dies, Samantha and Ehlert, Joseph and Klein, Brennan and Eliassi-Rad, Tina},
+  journal={arXiv preprint arXiv:2506.00156},
+  year={2025}
 }
 ````
 
