@@ -43,6 +43,7 @@ If you found this code useful for your own research, please cite our paper.
 - `plot_scripts/`: Contains all plotting code used to generate the figures in the paper.
 
 ### Real-World Data Processing
+- `APS_preprocess.py`: Preprocesses and cleans the APS data from initial download from APS to generating the hypergraph.
 - `real_world.py`: Cleans and processes real-world datasets, gender-labels nodes, generates hypergraphs, and extracts summary statistics.
 
 Dummy versions of select datasets are provided:
