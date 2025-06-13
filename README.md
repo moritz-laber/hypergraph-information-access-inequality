@@ -30,7 +30,7 @@ If you found this code useful for your own research, please cite our paper.
   - Measuring information access inequality, acquisition fairness, and diffusion fairness
 
 ### Core Classes and Utilities
-- `HyperGraph.py`: Defines the `HyperGraph` class and its extension `HyperGraphAsymmetricSI`, an environment for a non-linear Susceptible-Infected (SI) model on hypergraphs.
+- `HyperGraph.py`: Defines the `HyperGraph` class (referred to as the `H3 model` in the paper) and its extension `HyperGraphAsymmetricSI` (referred to as the `naSI` model in the paper), an environment for a non-linear Susceptible-Infected (SI) model on hypergraphs.
 - `HyperGraphHelper.py`: Helper functions for hypergraph construction, simulation setup, and fairness evaluation.
 - `fairness_measures.py`: Implements acquisition fairness and diffusion fairness metrics from Zappalà et al. (2024).
 - `stats.py`: Extracts and stores descriptive statistics from hypergraphs.
