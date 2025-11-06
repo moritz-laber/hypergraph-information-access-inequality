@@ -175,6 +175,8 @@ cython_debug/
 
 # the test data for the real_world scripts
 data/
+.idea/
+.DS_Store
 
 # Ignore everything under data/real_world except the dummy data
 data/real_world/*
