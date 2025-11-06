@@ -20,7 +20,7 @@ from plot_functions import *
 
 # I/O Parameters
 input_file = './results.pkl'
-output_path = './'
+output_path = '../'
 figname = 'fig06'
 dpi = 500
 

@@ -1,5 +1,5 @@
 """
-Figure 9
+Figure 9 SI
 
 This script generates diffusion fairness plots
 for real-world hypergraphs.
@@ -20,31 +20,21 @@ from plot_functions import *
 # I/O Parameters
 results_dir = './results'
 stats_dir = './stats'
-output_path = './'
-figname = 'fig09'
+output_path = '../'
+figname = 'fig09_SI'
 
 hypergraphs = [
-    'primaryschool',
-    'highschool',
-    'hospital',
-    'housebills',
     'housebillsgender_genderizerio',
-    'aps_genderapi',
-    'senatebills',
     'senatebillsgender_genderizerio', 
-    'dblp_genderapi'
+    'aps_genderizerio',
+    'dblp_genderizerio'
 ]
 
 
 hypergraph_names = [
-    'Primary School',
-    'High School',
-    'Hospital',
-    'House (Party)',
     'House (Gender)',
-    'APS',
-    'Senate (Party)',
     'Senate (Gender)',
+    'APS',
     'DBLP'
 ]
 
@@ -65,37 +55,22 @@ labels = {
 coordinates = {
     0 : (1,0),
     1 : (1,1),
-    2 : (1,2),
-    3 : (3,0),
-    4 : (3,1),
-    5 : (3,2),
-    6 : (5,0),
-    7 : (5,1),
-    8 : (5,2)
+    2 : (3,0),
+    3 : (3,1),
 }
 
 abc = {
     (1,0) : "(a)",
     (1,1) : "(b)",
-    (1,2) : "(c)",
-    (3,0) : "(d)",
-    (3,1) : "(e)",
-    (3,2) : "(f)",
-    (5,0) : "(g)",
-    (5,1) : "(h)",
-    (5,2) : "(i)"
+    (3,0) : "(c)",
+    (3,1) : "(d)",
 }
 
 diffusion_ylim = {
-    (1,0) : (0,1.5),
-    (1,1) : (0,1.5),
-    (1,2) : (0,1.5),
-    (3,0) : (0,5),
-    (3,1) : (0,35),
-    (3,2) : (0,1.5),
-    (5,0) : (0,5),
-    (5,1) : (0,1.5),
-    (5,2) : (0,1.5)
+    (1,0) : (0, 35),
+    (1,1) : (0, 1.5),
+    (3,0) : (0, 1.5),
+    (3,1) : (0, 1.5)
 }
 
 annotation_fontsizes = [12, 10]
@@ -120,10 +95,10 @@ text_line = "Diffusion fairness: Ability to disseminate information"
 figsize = (7.2, 7.2)   # inches
 figure_hspace = 0.75
 figure_wspace = 0.45
-figure_ncols = 3
-figure_nrows = 8
-figure_height_ratios = [0.2, 1.0, 0.15, 1.0, 0.15, 1.0, 0.01, 0.01]
-figure_width_ratios = [1., 1., 1.]
+figure_ncols = 2
+figure_nrows = 6
+figure_height_ratios = [0.2, 1.0, 0.15, 1.0, 0.01, 0.01]
+figure_width_ratios = [1., 1.]
 dpi = 500
 
 # Bootstrap Parameters
@@ -157,7 +132,7 @@ diffusion_style = {
     },
     'colors_axis' : 'k',
     'alpha_line' : 0.95,
-    'alpha_fill' : 0.5,
+    'alpha_fill' : 0.25,
     'linewidth' : 1,
     'linewidth_axis' : 1,
     'linestyle_axis' : '--',
@@ -186,8 +161,8 @@ diffusion_annotations = [
     'text_color' : small_annotation_color,
     'text_fontsize': 6,
     'text_fontstyle': 'italic',
-    'arrow_tip' :  (0.45, 0.80),
-    'arrow_tail' : (0.45, 0.80),
+    'arrow_tip' :  (0.65, 0.80),
+    'arrow_tail' : (0.65, 0.80),
     'arrow_props' :{
         'arrowstyle':'->',
         'color':'#586170',
@@ -210,8 +185,8 @@ diffusion_annotations = [
     'text_color' : small_annotation_color,
     'text_fontsize': 6,
     'text_fontstyle': 'italic',
-    'arrow_tip' :  (0.45, 0.22),
-    'arrow_tail' : (0.45, 0.22),
+    'arrow_tip' :  (0.65, 0.22),
+    'arrow_tail' : (0.65, 0.22),
     'arrow_props' :{
         'arrowstyle':'->',
         'color':'#586170',
@@ -287,7 +262,7 @@ fig = add_text(fig, gs[0,:], text_line, text_coords, text_style)
 ## Plot the different hypergraphs
 for i, hg in enumerate(hypergraphs):
     
-    if coordinates[i] == (1,0):
+    if coordinates[i] == (3,0):
         annotation_list = diffusion_annotations
     else:
         annotation_list = []
@@ -326,7 +301,7 @@ for i, hg in enumerate(hypergraphs):
 ## create the legend
 fig = add_legend(
     fig,
-    gs[7,:],
+    gs[5,:],
     legend_facecolors,
     legend_linecolors,
     legend_labels,

@@ -1,9 +1,9 @@
 """
-Figure 4 SI - 02
+Figure 4
 
-This script produces the analogoue of figure 04 in the
-main text for the supplementary information. The input
-needs to be prepared with prepare_data_synthetic.py.
+This script produces figure 04 in the main text,
+as well as the analogous figures in the SI. The 
+input needs to be prepared with prepare_data_synthetic.py.
 
 ML - 2025/05/12
 """
@@ -20,16 +20,16 @@ from plot_functions import *
 
 # I/O Parameters
 stats_dir = './stats'
-output_path = './'
-figname = 'fig04_SI_02'
+output_path = '../'
+figname = 'fig04'
 
 # Figure Parameters
-figsize = (7.2, 6.2)   # inches
+figsize = (7.2, 7.2)   # inches
 figure_hspace = 0.75
 figure_wspace = 0.25
 figure_ncols = 4
-figure_nrows = 6
-figure_height_ratios = [0.1, 1.0, 1.0, 1.0, 1.0, 0.05]
+figure_nrows = 8
+figure_height_ratios = [0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.05]
 figure_width_ratios = [1., 1., 1., 1.]
 dpi = 500
 
@@ -95,17 +95,21 @@ abc = {
 
 # Other Parameters
 hypergraphs = [
-    'aps_genderizerio',
-    'dblp_genderizerio',
-    'housebillsgender_genderizerio',
-    'senatebillsgender_genderizerio'
+    'aps_genderapi',
+    'dblp_genderapi',
+    'highschool',
+    'hospital',
+    'housebills',
+    'housebillsgender_genderapi'
 ]
 
 hypergraph_names = [
     'APS',
     'DBLP',
-    'House\n(Gender)',
-    'Senate\n(Gender)',
+    'High\nschool',
+    'Hospital',
+    'House\n(Party)',
+    'House\n(Gender)'
 ]
 
 groups = [0,1]
@@ -130,7 +134,7 @@ bar_style = {
     'bar_linewidth' : 0.75,
     'bar_width' : 0.25,
     'label_rotation' : 0,
-    'ylabel_coords' : (-0.05, 0.15),
+    'ylabel_coords' : (-0.35, 0.15),
     'yticks_if_label' : [0.0, 1.0]
 }
 

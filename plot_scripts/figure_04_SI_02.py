@@ -1,5 +1,5 @@
 """
-Figure 4 SI - 01
+Figure 4 SI - 02
 
 This script produces the analogoue of figure 04 in the
 main text for the supplementary information. The input
@@ -9,26 +9,27 @@ ML - 2025/05/12
 """
 
 ### IMPORT ###
-from plot_functions import *
 import matplotlib.gridspec as grid_spec
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 
+from plot_functions import *
+
 ### PARAMETERS ###
 
 # I/O Parameters
 stats_dir = './stats'
-output_path = './'
-figname = 'fig04_SI_01'
+output_path = '../'
+figname = 'fig04_SI_02'
 
 # Figure Parameters
-figsize = (7.2, 5.2)   # inches
+figsize = (7.2, 6.2)   # inches
 figure_hspace = 0.75
 figure_wspace = 0.25
 figure_ncols = 4
-figure_nrows = 5
-figure_height_ratios = [0.1, 1.0, 1.0, 1.0, 0.05]
+figure_nrows = 6
+figure_height_ratios = [0.1, 1.0, 1.0, 1.0, 1.0, 0.05]
 figure_width_ratios = [1., 1., 1., 1.]
 dpi = 500
 
@@ -50,8 +51,8 @@ letter_fw = 'bold'
 name_fw = 'normal'
 s_fw = 'normal'
 
-letter_coord = (-0.75, 0.75)
-name_coord = (-0.75, 0.45)
+letter_coord = (-0.55, 0.75)
+name_coord = (-0.55, 0.45)
 s_coord = (0.5, 1.05)
 
 letter_c = 'k'
@@ -94,14 +95,16 @@ abc = {
 
 # Other Parameters
 hypergraphs = [
-    'primaryschool',
-    'senatebills',
-    'senatebillsgender_genderapi',
+    'aps_genderizerio',
+    'dblp_genderizerio',
+    'housebillsgender_genderizerio',
+    'senatebillsgender_genderizerio'
 ]
 
 hypergraph_names = [
-    'Primary\nschool',
-    'Senate\n(Party)',
+    'APS',
+    'DBLP',
+    'House\n(Gender)',
     'Senate\n(Gender)',
 ]
 
@@ -127,9 +130,10 @@ bar_style = {
     'bar_linewidth' : 0.75,
     'bar_width' : 0.25,
     'label_rotation' : 0,
-    'ylabel_coords' : (-0.35, 0.25),
+    'ylabel_coords' : (-0.05, 0.15),
     'yticks_if_label' : [0.0, 1.0]
 }
+
 bar_xlabel = r'$r$'
 bar_ylabel = r'$h^{(g)}_{s,r}$'
 

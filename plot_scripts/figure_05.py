@@ -1,9 +1,9 @@
 """
-Figure 5 SI
+Figure 5
 
-This script generates the analogoues of figure 05
-for the supplementary information. The input needs
-to be prepared with prepare_data_synthetic.py.
+This script generates figure 05 in the main text,
+as well as the analogous figures in the SI. The 
+input needs to be prepared with prepare_data_synthetic.py.
 
 ML - 2025/05/12
 """
@@ -21,21 +21,31 @@ from plot_functions import *
 # I/O Parameters
 results_dir = './results'
 stats_dir = './stats'
-output_path = './'
-figname = 'fig05_SI'
+output_path = '../'
+figname = 'fig05'
 
 hypergraphs = [
-    'housebillsgender_genderizerio',
-    'senatebillsgender_genderizerio', 
-    'aps_genderizerio',
-    'dblp_genderizerio'
+    'primaryschool',
+    'highschool',
+    'hospital',
+    'housebills',
+    'housebillsgender_genderapi',
+    'aps_genderapi',
+    'senatebills',
+    'senatebillsgender_genderapi', 
+    'dblp_genderapi'
 ]
 
 
 hypergraph_names = [
+    'Primary School',
+    'High School',
+    'Hospital',
+    'House (Party)',
     'House (Gender)',
-    'Senate (Gender)',
     'APS',
+    'Senate (Party)',
+    'Senate (Gender)',
     'DBLP'
 ]
 
@@ -56,15 +66,25 @@ labels = {
 coordinates = {
     0 : (1,0),
     1 : (1,1),
-    2 : (3,0),
-    3 : (3,1)
+    2 : (1,2),
+    3 : (3,0),
+    4 : (3,1),
+    5 : (3,2),
+    6 : (5,0),
+    7 : (5,1),
+    8 : (5,2)
 }
 
 abc = {
     (1,0) : "(a)",
     (1,1) : "(b)",
-    (3,0) : "(c)",
-    (3,1) : "(d)"
+    (1,2) : "(c)",
+    (3,0) : "(d)",
+    (3,1) : "(e)",
+    (3,2) : "(f)",
+    (5,0) : "(g)",
+    (5,1) : "(h)",
+    (5,2) : "(i)"
 }
 
 annotation_fontsizes = [12, 10]
@@ -89,10 +109,10 @@ text_line = "Information access inequality in real-world hypergraphs"
 figsize = (7.2, 7.2)   # inches
 figure_hspace = 0.75
 figure_wspace = 0.25
-figure_ncols = 2
-figure_nrows = 6
-figure_height_ratios = [0.1, 1.0, 0.15, 1.0, 0.05, 0.05]
-figure_width_ratios = [1., 1.]
+figure_ncols = 3
+figure_nrows = 8
+figure_height_ratios = [0.1, 1.0, 0.15, 1.0, 0.15, 1.0, 0.05, 0.05]
+figure_width_ratios = [1., 1., 1.]
 dpi = 500
 
 # Ridge Plot Parameters
@@ -325,7 +345,7 @@ for i, hg in enumerate(hypergraphs):
 ## create the legend
 fig = add_legend(
     fig,
-    gs[5,:],
+    gs[7,:],
     legend_facecolors,
     legend_linecolors,
     legend_labels,

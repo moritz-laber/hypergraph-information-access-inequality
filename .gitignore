@@ -172,3 +172,13 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# the test data for the real_world scripts
+data/
+
+# Ignore everything under data/real_world except the dummy data
+data/real_world/*
+!data/real_world/dummy_highschool/
+!data/real_world/dummy_highschool/**
+!data/real_world/dummy_hospital/
+!data/real_world/dummy_hospital/**
