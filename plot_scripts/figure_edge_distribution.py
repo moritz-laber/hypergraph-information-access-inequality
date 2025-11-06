@@ -20,8 +20,8 @@ from plot_functions import create_figure, add_text
 ### PARAMETERS ###
 
 # Paths
-base_path = None
-output_path = '../'
+base_path = './hypergraphs/'
+output_path = './'
 figname = 'edgesize_distributions'
 
 # Datasets
@@ -45,7 +45,7 @@ titles = [
 ]
 
 # Labels
-abc = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+abc = ['(a)', '(b)', '(c)', '(d)', '(e)', '(f)', '(g)']
 log_bin_names = ['housebills', 'aps', 'senatebills', 'dblp']
 
 # Coordinates
