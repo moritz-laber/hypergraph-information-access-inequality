@@ -73,12 +73,12 @@ ticksize = 10                               # size of tickmarkers
 textsize = 12                               # size of subplotlabels
 textfontweight = 'bold'                     # fontweight of subplotlabels
 textcoords = (-0.15, 1.05)                  # coordinates of subplotlabels
-letters = {(0,0) : 'a',                     # subplotlabels
-           (0,1) : 'b', 
-           (0,2) : 'c',
-           (1,0) : 'd',
-           (1,1) : 'e',
-           (1,2) : 'f'}
+letters = {(0,0) : '(a)',                     # subplotlabels
+           (0,1) : '(b)', 
+           (0,2) : '(c)',
+           (1,0) : '(d)',
+           (1,1) : '(e)',
+           (1,2) : '(f)'}
 headercoords = (0.29, 1.05)                   # coordinates for subplot headers
 headersize = 12                               # size of subplotheaders
 to_header = {('weak', 0.5)    : 'hom. bal.',  # subplotheaders

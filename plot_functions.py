@@ -364,6 +364,7 @@ def create_violinplot(
     text_colors - list of colors for the text
     annotation_list - list of dictionaries with the annotations with arrows
     style - dictionary with colors, line widths, etc.
+    annotation_centered - whether the annotation coordinates are with respect to the first (false) or middle (true) violin axis
 
     Output
     fig - the figure
@@ -491,6 +492,7 @@ def create_violinplot(
 
     for text, coords, fs, fw, c in zip(texts, text_coords, text_fontsizes, text_fontweights, text_colors):
         x,y = coords
+
         axs[-1].text(x,y, text, ha='center', transform=axs[int(num_curves/2)].transAxes, fontsize=fs, fontweight=fw, color=c)
 
     return fig
@@ -710,7 +712,7 @@ def create_acquisition_fairness_plot(
 
         # create the plot
         ax.plot(fs[fs>0], alpha_mean, color=style['colors_line'][key], alpha=style['alpha_line'], lw=style['linewidth'])
-        ax.fill_between(fs[fs>0], alpha_low, alpha_high, color=style['colors_fill'][key], alpha=style['alpha_fill'])
+        ax.fill_between(fs[fs>0], alpha_low, alpha_high, color=style['colors_fill'][key], alpha=style['alpha_fill'], lw=0)
         ax.hlines(1.0, 0., fs.max(), lw=style['linewidth_axis'], ls=style['linestyle_axis'], color=style['colors_axis'])
         ax.set_xlim(*xlim)
         ax.set_ylim(*ylim)
@@ -858,7 +860,7 @@ def create_diffusion_fairness_plot(
         delta_high = np.nanpercentile(delta, p, axis=0)
 
         ax.plot(fs[fs>0], delta_mean, color=style['colors_line'][key], alpha=style['alpha_line'], lw=style['linewidth'])
-        ax.fill_between(fs[fs>0], delta_low, delta_high, color=style['colors_fill'][key], alpha=style['alpha_fill'])
+        ax.fill_between(fs[fs>0], delta_low, delta_high, color=style['colors_fill'][key], alpha=style['alpha_fill'], lw=0)
         ax.hlines(1.0, 0.,fs.max(), lw=style['linewidth_axis'], ls=style['linestyle_axis'], color=style['colors_axis'])
         ax.set_xlim(*xlim)
         ax.set_ylim(*ylim)
@@ -1243,3 +1245,38 @@ def compute_kde_violin(
                 
 
     return kde, vals, (xmin, xmax), (ymin, ymax)
+
+# DEGREE DISTRIBUTION BINNING
+def degree_distribution_binning(
+        degree_sequence:ArrayLike,
+        nbins:int=10,
+        logbinning:bool=True
+        )->Tuple[np.ndarray, np.ndarray]:
+    """Compute the degree distribution from a degree sequence.
+    
+    Input
+    - degree_sequence : the degree sequence of the network (or several networks concatenated)
+    - nbins : the number of bins to use for the histogram
+    - logbinning : whether to use logarithmic binning
+
+    Output
+    - pk : the degree distribution
+    - k  : the bin centeres
+    """
+
+    degree_sequence = np.asarray(degree_sequence)
+
+    kmin = np.min(degree_sequence)
+    kmax = np.max(degree_sequence)
+
+    # bins
+    if logbinning:
+        bins = np.logspace(np.log10(kmin), np.log10(kmax+1), base=10, num=nbins)
+    else:
+        bins = np.linspace(kmin, kmax+1, num=nbins)
+
+    # histogram
+    pk, _ = np.histogram(degree_sequence, bins=bins, density=True)
+    k = 0.5 * (bins[1:] + bins[:-1])
+
+    return pk, k

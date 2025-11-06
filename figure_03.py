@@ -40,14 +40,14 @@ text_line_2 = "Diffusion fairness: Ability to disseminate information"
 
 # Annotations
 abc = {
-    (1 ,0) : "a",
-    (1 ,1) : "b",
-    (1 ,2) : "c",
-    (1 ,3) : "d",
-    (3 ,0) : "e",
-    (3 ,1) : "f",
-    (3 ,2) : "g",
-    (3 ,3) : "h"
+    (1 ,0) : "(a)",
+    (1 ,1) : "(b)",
+    (1 ,2) : "(c)",
+    (1 ,3) : "(d",
+    (3 ,0) : "(e)",
+    (3 ,1) : "(f)",
+    (3 ,2) : "(g)",
+    (3 ,3) : "(h)"
 }
 
 annotation_fontsizes = [12, 10]

@@ -1,50 +1,33 @@
-"""
-Figure 9
-
-This script generates diffusion fairness plots
-for real-world hypergraphs.
-
-ML - 2025/05/12
-"""
+## FIGURE 8
+# 
+# This figure has acquisition fairness plots for
+# real-world hypergraphs.
 
 ### IMPORT ###
+from plot_functions import *
 import matplotlib.gridspec as grid_spec
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 
-from plot_functions import *
 
-### PARAMETERS ###
-
-# I/O Parameters
 results_dir = './results'
 stats_dir = './stats'
 output_path = './'
-figname = 'fig09'
+figname = 'fig08_SI_min'
 
 hypergraphs = [
-    'primaryschool',
-    'highschool',
-    'hospital',
-    'housebills',
     'housebillsgender_genderizerio',
-    'aps_genderapi',
-    'senatebills',
     'senatebillsgender_genderizerio', 
-    'dblp_genderapi'
+    'aps_genderizerio',
+    'dblp_genderizerio'
 ]
 
 
 hypergraph_names = [
-    'Primary School',
-    'High School',
-    'Hospital',
-    'House (Party)',
     'House (Gender)',
-    'APS',
-    'Senate (Party)',
     'Senate (Gender)',
+    'APS',
     'DBLP'
 ]
 
@@ -65,37 +48,15 @@ labels = {
 coordinates = {
     0 : (1,0),
     1 : (1,1),
-    2 : (1,2),
-    3 : (3,0),
-    4 : (3,1),
-    5 : (3,2),
-    6 : (5,0),
-    7 : (5,1),
-    8 : (5,2)
+    2 : (3,0),
+    3 : (3,1)
 }
 
 abc = {
     (1,0) : "(a)",
     (1,1) : "(b)",
-    (1,2) : "(c)",
-    (3,0) : "(d)",
-    (3,1) : "(e)",
-    (3,2) : "(f)",
-    (5,0) : "(g)",
-    (5,1) : "(h)",
-    (5,2) : "(i)"
-}
-
-diffusion_ylim = {
-    (1,0) : (0,1.5),
-    (1,1) : (0,1.5),
-    (1,2) : (0,1.5),
-    (3,0) : (0,5),
-    (3,1) : (0,35),
-    (3,2) : (0,1.5),
-    (5,0) : (0,5),
-    (5,1) : (0,1.5),
-    (5,2) : (0,1.5)
+    (3,0) : "(c)",
+    (3,1) : "(d)",
 }
 
 annotation_fontsizes = [12, 10]
@@ -114,35 +75,34 @@ text_style = {
 }
 
 text_coords = (-0.04, 0.4)
-text_line = "Diffusion fairness: Ability to disseminate information"
+text_line = "Acquisition fairness: Ability to acquire information"
 
 # Figure Parameters
 figsize = (7.2, 7.2)   # inches
 figure_hspace = 0.75
 figure_wspace = 0.45
-figure_ncols = 3
-figure_nrows = 8
-figure_height_ratios = [0.2, 1.0, 0.15, 1.0, 0.15, 1.0, 0.01, 0.01]
-figure_width_ratios = [1., 1., 1.]
+figure_ncols = 2
+figure_nrows = 6
+figure_height_ratios = [0.2, 1.0, 0.15, 1.0, 0.01, 0.01]
+figure_width_ratios = [1., 1.,]
 dpi = 500
 
 # Bootstrap Parameters
 bootstrap_seed = 213
 bootstrap_num = 100
-bootstrap_p = 0.90
+bootstrap_p = 0.99
 
-# Diffusion Fairness Parameters
+# Acquisition Fairness Parameters
+acquisition_xlabel = r'$f$'
+acquisition_ylabel = r'$\alpha(f)$'
+acquisition_ylim = (0., 1.6)
+acquisition_yticks = [0.0, 0.5, 1.0, 1.5]
+acquisition_yticklabels = ['0.0', '0.5', '1.0', '1.5']
+acquisition_xlim = (0.0, 0.9)
+acquisition_xticks = [0.0, 0.3, 0.6, 0.9]
+acquisition_xticklabels = ['0.0', '0.3', '0.6', '0.9']
 
-diffusion_xlabel = r'$f$'
-diffusion_ylabel = r'$\delta(f)$'
-diffusion_yticks = None
-diffusion_yticklabels = None
-diffusion_xlim = (0., 0.9)
-diffusion_xticks = [0.0, 0.3, 0.6, 0.9]
-diffusion_xticklabels = ['0.0', '0.3', '0.6', '0.9']
-yaxis_visible = True
-
-diffusion_style = {
+acquisition_style = {
     'colors_line' : {
         'linear' : '#004563',
         'sublinear' : '#b679ae',
@@ -157,7 +117,7 @@ diffusion_style = {
     },
     'colors_axis' : 'k',
     'alpha_line' : 0.95,
-    'alpha_fill' : 0.5,
+    'alpha_fill' : 0.95,
     'linewidth' : 1,
     'linewidth_axis' : 1,
     'linestyle_axis' : '--',
@@ -168,14 +128,14 @@ diffusion_style = {
     'label_rotation' : 40 
 }
 
-diffusion_annotations = [
+acquisition_annotations = [
     {
     'text' : '',
     'text_fontsize': 6,
     'text_color' : small_annotation_color,
     'text_fontstyle': 'italic',
-    'arrow_tip' :  (0.9, 1.05),
-    'arrow_tail' : (0.9, 0.75),
+    'arrow_tip' :  (0.9, 1.10),
+    'arrow_tail' : (0.9, 0.80),
     'arrow_props' :{
         'arrowstyle':'->',
         'color':'#586170',
@@ -186,8 +146,8 @@ diffusion_annotations = [
     'text_color' : small_annotation_color,
     'text_fontsize': 6,
     'text_fontstyle': 'italic',
-    'arrow_tip' :  (0.45, 0.80),
-    'arrow_tail' : (0.45, 0.80),
+    'arrow_tip' :  (0.55, 0.85),
+    'arrow_tail' : (0.55, 0.85),
     'arrow_props' :{
         'arrowstyle':'->',
         'color':'#586170',
@@ -198,8 +158,8 @@ diffusion_annotations = [
     'text_color' : small_annotation_color,
     'text_fontsize': 6,
     'text_fontstyle': 'italic',
-    'arrow_tip' :  (0.9, 0.15),
-    'arrow_tail' : (0.9, 0.45),
+    'arrow_tip' :  (0.9, 0.05),
+    'arrow_tail' : (0.9, 0.35),
     'arrow_props' :{
         'arrowstyle':'->',
         'color':'#586170',
@@ -210,15 +170,14 @@ diffusion_annotations = [
     'text_color' : small_annotation_color,
     'text_fontsize': 6,
     'text_fontstyle': 'italic',
-    'arrow_tip' :  (0.45, 0.22),
-    'arrow_tail' : (0.45, 0.22),
+    'arrow_tip' :  (0.55, 0.12),
+    'arrow_tail' : (0.55, 0.12),
     'arrow_props' :{
         'arrowstyle':'->',
         'color':'#586170',
         'lw':0.0}
     }
 ]
-
 
 
 
@@ -231,17 +190,17 @@ legend_labels = [
 ]
 
 legend_linecolors = [
-        diffusion_style['colors_line']['linear'],
-        diffusion_style['colors_line']['sublinear'],
-        diffusion_style['colors_line']['superlinear'],
-        diffusion_style['colors_line']['asymmetric'],
+        acquisition_style['colors_line']['linear'],
+        acquisition_style['colors_line']['sublinear'],
+        acquisition_style['colors_line']['superlinear'],
+        acquisition_style['colors_line']['asymmetric'],
 ]
 
 legend_facecolors = [
-        diffusion_style['colors_line']['linear'],
-        diffusion_style['colors_line']['sublinear'],
-        diffusion_style['colors_line']['superlinear'],
-        diffusion_style['colors_line']['asymmetric'],
+        acquisition_style['colors_line']['linear'],
+        acquisition_style['colors_line']['sublinear'],
+        acquisition_style['colors_line']['superlinear'],
+        acquisition_style['colors_line']['asymmetric'],
 ]
 
 legend_fontsize = 7
@@ -288,45 +247,48 @@ fig = add_text(fig, gs[0,:], text_line, text_coords, text_style)
 for i, hg in enumerate(hypergraphs):
     
     if coordinates[i] == (1,0):
-        annotation_list = diffusion_annotations
+        annotation_list = acquisition_annotations
     else:
         annotation_list = []
-            
-    sub_results_0 = {key[1] : val for key, val in results.items() if key[0]==0 and key[2]==hg}
-    sub_results_1 = {key[1] : val for key, val in results.items() if key[0]==1 and key[2]==hg}
 
-    # diffusion fairness plot for a given dynamics
-    create_diffusion_fairness_plot(
+    if coordinates[i][1] == 0:
+        yaxis_visible = True
+    else:
+        yaxis_visible = False
+            
+    sub_results = {key[1] : val for key, val in results.items() if key[0]==spm and key[2]==hg}
+
+    # acquisition fairness plot for a given dynamics
+    create_acquisition_fairness_plot(
         fig,
         gs[coordinates[i]],
-        sub_results_0,
-        sub_results_1,
-        diffusion_xlim,
-        diffusion_ylim[coordinates[i]],
+        sub_results,
+        acquisition_xlim,
+        acquisition_ylim,
         bootstrap_p,
         bootstrap_num,
         rng,
         yaxis_visible,
-        diffusion_xlabel,
-        diffusion_ylabel,
-        diffusion_yticks,
-        diffusion_yticklabels,
-        diffusion_xticks,
-        diffusion_xticklabels,
+        acquisition_xlabel,
+        acquisition_ylabel,
+        acquisition_yticks,
+        acquisition_yticklabels,
+        acquisition_xticks,
+        acquisition_xticklabels,
         [abc[coordinates[i]], hypergraph_names[i]],
         annotation_coords,
         annotation_fontsizes,
         annotation_fontweights,
         annotation_colors,
         annotation_list,
-        diffusion_style
+        acquisition_style
     )
 
 
 ## create the legend
 fig = add_legend(
     fig,
-    gs[7,:],
+    gs[5,:],
     legend_facecolors,
     legend_linecolors,
     legend_labels,
